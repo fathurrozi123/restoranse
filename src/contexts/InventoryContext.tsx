@@ -60,19 +60,38 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         const uniqueCategories = [...new Set(data.map(item => item.category))];
         setCategories(uniqueCategories);
       }
-    } catch (error) {
-      console.error('Error fetching menu items:', error);
-      toast.error('Failed to load menu items');
+    } catch (error: any) {
+      console.error('Error fetching menu items:', error.message);
+      toast.error(`Failed to load menu items: ${error.message}`);
+      // Set empty arrays to prevent undefined errors
+      setMenuItems([]);
+      setCategories([]);
     } finally {
       setLoading(false);
     }
   };
 
+  // Fetch menu items on mount and when user changes
   useEffect(() => {
-    if (user) {
-      fetchMenuItems();
-    }
-  }, [user]);
+    fetchMenuItems();
+  }, []);
+
+  // Set up real-time subscription for menu items
+  useEffect(() => {
+    const subscription = supabase
+      .channel('menu_items_changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'menu_items' }, 
+        () => {
+          fetchMenuItems();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const updateStockQuantity = async (id: string, quantity: number) => {
     try {
@@ -97,9 +116,9 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       );
 
       toast.success('Stock updated successfully');
-    } catch (error) {
-      console.error('Error updating stock:', error);
-      toast.error('Failed to update stock');
+    } catch (error: any) {
+      console.error('Error updating stock:', error.message);
+      toast.error(`Failed to update stock: ${error.message}`);
     }
   };
 
@@ -123,9 +142,9 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         
         toast.success('Menu item added successfully');
       }
-    } catch (error) {
-      console.error('Error adding menu item:', error);
-      toast.error('Failed to add menu item');
+    } catch (error: any) {
+      console.error('Error adding menu item:', error.message);
+      toast.error(`Failed to add menu item: ${error.message}`);
     }
   };
 
@@ -156,9 +175,9 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       }
 
       toast.success('Menu item updated successfully');
-    } catch (error) {
-      console.error('Error updating menu item:', error);
-      toast.error('Failed to update menu item');
+    } catch (error: any) {
+      console.error('Error updating menu item:', error.message);
+      toast.error(`Failed to update menu item: ${error.message}`);
     }
   };
 
@@ -181,9 +200,9 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setCategories(remainingCategories);
 
       toast.success('Menu item deleted successfully');
-    } catch (error) {
-      console.error('Error deleting menu item:', error);
-      toast.error('Failed to delete menu item');
+    } catch (error: any) {
+      console.error('Error deleting menu item:', error.message);
+      toast.error(`Failed to delete menu item: ${error.message}`);
     }
   };
 
