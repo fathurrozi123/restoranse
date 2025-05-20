@@ -97,7 +97,7 @@ const Login: React.FC = () => {
         
         <div className="mt-6 text-center text-sm text-gray-600">
           <p>Demo access:</p>
-          <p className="mt-1">Email: manager@foodhub.com | Password: manager123</p>
+          <p className="mt-1">Email: demo.manager@foodhub.com | Password: demo123</p>
         </div>
       </div>
     </div>
